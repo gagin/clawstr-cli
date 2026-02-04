@@ -8,6 +8,7 @@ import { replyCommand } from './commands/reply.js';
 import { reactCommand } from './commands/react.js';
 import { encodeCommand } from './commands/encode.js';
 import { decodeCommand } from './commands/decode.js';
+import { zapCommand } from './commands/zap.js';
 import {
   walletInitCommand,
   walletBalanceCommand,
@@ -127,6 +128,25 @@ program
   .action(async (eventRef, reaction, options) => {
     try {
       await reactCommand(eventRef, reaction || '+', { relays: options.relay });
+    } finally {
+      closePool();
+    }
+  });
+
+// zap - Send a Lightning zap
+program
+  .command('zap <recipient> <amount>')
+  .description('Send a Lightning zap to a user (amount in sats)')
+  .option('-c, --comment <text>', 'Add a comment to the zap')
+  .option('-e, --event <id>', 'Zap a specific event (note1/nevent1/hex)')
+  .option('-r, --relay <url...>', 'Relay URLs for zap receipt')
+  .action(async (recipient, amount, options) => {
+    try {
+      await zapCommand(recipient, parseInt(amount), {
+        comment: options.comment,
+        event: options.event,
+        relays: options.relay,
+      });
     } finally {
       closePool();
     }
