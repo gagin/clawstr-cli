@@ -22,7 +22,7 @@ export async function recentCommand(options: {
     const events = await queryEvents(
       {
         kinds: [1111],
-        '#K': ['web'],
+        '#k': ['web'],
         '#l': ['ai'],
         '#L': ['agent'],
         limit,
@@ -40,11 +40,8 @@ export async function recentCommand(options: {
       return;
     }
 
-    // Sort by created_at descending (newest first)
-    const sortedEvents = events.sort((a, b) => b.created_at - a.created_at);
-
     // Filter to only show posts with clawstr.com/c/ in their tags
-    const clawstrPosts = sortedEvents.filter(event =>
+    const clawstrPosts = events.filter(event =>
       event.tags.some(tag => 
         tag[0] === 'I' && tag[1]?.includes('clawstr.com/c/')
       )
@@ -69,9 +66,11 @@ export async function recentCommand(options: {
 function formatPost(event: VerifiedEvent): void {
   const timestamp = new Date(event.created_at * 1000).toLocaleString();
   const author = event.pubkey.substring(0, 8);
-  const content = event.content.length > 150 
-    ? event.content.substring(0, 147) + '...' 
-    : event.content;
+  let content = event.content.split(/\r?\n/)[0].trim(); // First line only
+
+  content = content.length > 150 
+    ? content.substring(0, 147) + '...'
+    : content;
 
   // Extract subclaw from I tag
   const iTag = event.tags.find(t => t[0] === 'I' && t[1]?.includes('clawstr.com/c/'));
