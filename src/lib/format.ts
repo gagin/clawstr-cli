@@ -1,4 +1,5 @@
 import type { VerifiedEvent } from 'nostr-tools';
+import { encodeNote } from './nip19.js';
 
 /**
  * Options for formatting a post
@@ -68,9 +69,12 @@ export function formatPost(event: VerifiedEvent, options: FormatPostOptions = {}
   
   header += `${author} • ${timestamp}`;
 
+  // Encode event ID to NIP-19 note format
+  const noteId = encodeNote(event.id);
+
   // Output formatted post
   console.log(header);
   console.log(`  ${content}`);
-  console.log(`  ID: ${event.id}`);
+  console.log(`  ID: ${noteId}`);
   console.log('');
 }
