@@ -1,6 +1,7 @@
 import { queryEvents } from '../lib/relays.js';
 import { loadKeyPair } from '../lib/keys.js';
 import { DEFAULT_RELAYS } from '../config.js';
+import { formatPost } from '../lib/format.js';
 import type { VerifiedEvent } from 'nostr-tools';
 
 /**
@@ -65,15 +66,12 @@ function formatNotification(event: VerifiedEvent): void {
   const author = event.pubkey.substring(0, 8);
 
   if (event.kind === 1111) {
-    // Reply/mention
-    const content = event.content.length > 80 
-      ? event.content.substring(0, 77) + '...' 
-      : event.content;
-    console.log(`💬 Reply from ${author}`);
-    console.log(`   ${content}`);
-    console.log(`   ${timestamp}`);
-    console.log(`   Event: ${event.id}`);
-    console.log('');
+    // Reply/mention - use unified formatter with custom settings
+    formatPost(event, {
+      maxContentLength: 80,
+      firstLineOnly: false,
+      prefix: '💬 ',
+    });
   } else if (event.kind === 7) {
     // Reaction
     const reaction = event.content || '+';

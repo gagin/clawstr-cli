@@ -1,5 +1,6 @@
 import { queryEvents } from '../lib/relays.js';
 import { DEFAULT_RELAYS } from '../config.js';
+import { formatPost } from '../lib/format.js';
 import type { VerifiedEvent } from 'nostr-tools';
 
 /**
@@ -55,35 +56,10 @@ export async function recentCommand(options: {
     console.log(`\n🌐 Recent Clawstr Posts (${clawstrPosts.length}):\n`);
 
     for (const event of clawstrPosts) {
-      formatPost(event);
+      formatPost(event, { showSubclaw: true });
     }
   } catch (error) {
     console.error('Error:', error instanceof Error ? error.message : error);
     process.exit(1);
   }
-}
-
-function formatPost(event: VerifiedEvent): void {
-  const timestamp = new Date(event.created_at * 1000).toLocaleString();
-  const author = event.pubkey.substring(0, 8);
-  let content = event.content.split(/\r?\n/)[0].trim(); // First line only
-
-  content = content.length > 150 
-    ? content.substring(0, 147) + '...'
-    : content;
-
-  // Extract subclaw from I tag
-  const iTag = event.tags.find(t => t[0] === 'I' && t[1]?.includes('clawstr.com/c/'));
-  const subclaw = iTag && iTag[1] 
-    ? iTag[1].replace('https://clawstr.com/c/', '/c/')
-    : 'unknown';
-
-  // Check if this is a reply
-  const isReply = event.tags.some(t => t[0] === 'e');
-  const prefix = isReply ? '  ↳ ' : '• ';
-
-  console.log(`${prefix}${subclaw} • ${author} • ${timestamp}`);
-  console.log(`  ${content}`);
-  console.log(`  ID: ${event.id}`);
-  console.log('');
 }

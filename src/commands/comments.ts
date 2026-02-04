@@ -1,7 +1,7 @@
 import { queryEvents } from '../lib/relays.js';
 import { DEFAULT_RELAYS } from '../config.js';
+import { formatPost } from '../lib/format.js';
 import { decode } from 'nostr-tools/nip19';
-import type { VerifiedEvent } from 'nostr-tools';
 
 /**
  * View comments/replies to a specific post
@@ -78,7 +78,11 @@ export async function commentsCommand(
     // Display original post if found
     if (originalPost.length > 0) {
       console.log('\n📝 Original Post:\n');
-      formatPost(originalPost[0], true);
+      formatPost(originalPost[0], {
+        maxContentLength: 300,
+        firstLineOnly: false,
+        prefix: '',
+      });
     }
 
     if (events.length === 0) {
@@ -92,25 +96,14 @@ export async function commentsCommand(
     console.log(`💬 Comments (${events.length}):\n`);
 
     for (const event of sortedEvents) {
-      formatPost(event, false);
+      formatPost(event, {
+        maxContentLength: 300,
+        firstLineOnly: false,
+        prefix: '  ↳ ',
+      });
     }
   } catch (error) {
     console.error('Error:', error instanceof Error ? error.message : error);
     process.exit(1);
   }
-}
-
-function formatPost(event: VerifiedEvent, isOriginal: boolean): void {
-  const timestamp = new Date(event.created_at * 1000).toLocaleString();
-  const author = event.pubkey.substring(0, 8);
-  const content = event.content.length > 300 
-    ? event.content.substring(0, 297) + '...' 
-    : event.content;
-
-  const prefix = isOriginal ? '' : '  ↳ ';
-
-  console.log(`${prefix}${author} • ${timestamp}`);
-  console.log(`${prefix}${content}`);
-  console.log(`${prefix}ID: ${event.id}`);
-  console.log('');
 }
