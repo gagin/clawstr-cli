@@ -19,6 +19,16 @@ import {
   walletMnemonicCommand,
   walletHistoryCommand,
 } from './commands/wallet.js';
+import {
+  followCommand,
+  unfollowCommand,
+  muteCommand,
+  unmuteCommand,
+  graphSyncCommand,
+  graphFilterCommand,
+  listContactsCommand,
+  listMutesCommand,
+} from './commands/social.js';
 import { closePool } from './lib/relays.js';
 
 const program = new Command();
@@ -227,6 +237,83 @@ wallet
   .option('--json', 'Output as JSON')
   .action(async (options) => {
     await walletHistoryCommand({ limit: parseInt(options.limit), json: options.json });
+  });
+
+// follow - Follow a user
+program
+  .command('follow <pubkey>')
+  .description('Follow a user (add to contact list)')
+  .option('--relay <url>', 'Relay hint for this contact')
+  .option('--petname <name>', 'Petname for this contact')
+  .option('--no-publish', 'Do not publish to relays')
+  .action(async (pubkey, options) => {
+    await followCommand(pubkey, options);
+  });
+
+// unfollow - Unfollow a user
+program
+  .command('unfollow <pubkey>')
+  .description('Unfollow a user')
+  .option('--no-publish', 'Do not publish to relays')
+  .action(async (pubkey, options) => {
+    await unfollowCommand(pubkey, options);
+  });
+
+// mute - Mute a user
+program
+  .command('mute <pubkey>')
+  .description('Mute a user')
+  .option('--no-publish', 'Do not publish to relays')
+  .action(async (pubkey, options) => {
+    await muteCommand(pubkey, options);
+  });
+
+// unmute - Unmute a user
+program
+  .command('unmute <pubkey>')
+  .description('Unmute a user')
+  .option('--no-publish', 'Do not publish to relays')
+  .action(async (pubkey, options) => {
+    await unmuteCommand(pubkey, options);
+  });
+
+// contacts - List contacts
+program
+  .command('contacts')
+  .description('List followed users')
+  .option('--json', 'Output as JSON')
+  .action((options) => {
+    listContactsCommand(options);
+  });
+
+// mutes - List muted users
+program
+  .command('mutes')
+  .description('List muted users')
+  .option('--json', 'Output as JSON')
+  .action((options) => {
+    listMutesCommand(options);
+  });
+
+// graph - Social graph operations
+const graph = program
+  .command('graph')
+  .description('Social graph operations');
+
+graph
+  .command('sync')
+  .description('Sync contact and mute lists from relays')
+  .option('-d, --depth <number>', 'Graph crawl depth (default: 2)', '2')
+  .action(async (options) => {
+    await graphSyncCommand({ depth: parseInt(options.depth) });
+  });
+
+graph
+  .command('filter')
+  .description('Filter stdin events by trust distance')
+  .option('-d, --max-distance <number>', 'Maximum trust distance (default: 2)', '2')
+  .action(async (options) => {
+    await graphFilterCommand({ maxDistance: parseInt(options.maxDistance) });
   });
 
 export { program };
