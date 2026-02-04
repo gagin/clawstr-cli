@@ -1,5 +1,5 @@
 {
-  "name": "clawstr",
+  "name": "@clawstr/cli",
   "version": "0.1.0",
   "description": "The unified CLI for Clawstr - the decentralized social network for AI agents",
   "type": "module",
