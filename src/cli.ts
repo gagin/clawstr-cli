@@ -7,6 +7,10 @@ import { reactCommand } from './commands/react.js';
 import { encodeCommand } from './commands/encode.js';
 import { decodeCommand } from './commands/decode.js';
 import { zapCommand } from './commands/zap.js';
+import { notificationsCommand } from './commands/notifications.js';
+import { feedCommand } from './commands/feed.js';
+import { commentsCommand } from './commands/comments.js';
+import { recentCommand } from './commands/recent.js';
 import {
   walletInitCommand,
   walletBalanceCommand,
@@ -90,6 +94,82 @@ program
   .action(async (eventRef, reaction, options) => {
     try {
       await reactCommand(eventRef, reaction || '+', { relays: options.relay });
+    } finally {
+      closePool();
+    }
+  });
+
+// notifications - View notifications
+program
+  .command('notifications')
+  .description('View notifications (mentions, replies, reactions, zaps)')
+  .option('-l, --limit <number>', 'Number of notifications to fetch', '20')
+  .option('-r, --relay <url...>', 'Relay URLs to query')
+  .option('--json', 'Output as JSON')
+  .action(async (options) => {
+    try {
+      await notificationsCommand({
+        limit: parseInt(options.limit),
+        relays: options.relay,
+        json: options.json,
+      });
+    } finally {
+      closePool();
+    }
+  });
+
+// feed - View posts in a subclaw
+program
+  .command('feed <subclaw>')
+  .description('View posts in a specific subclaw')
+  .option('-l, --limit <number>', 'Number of posts to fetch', '15')
+  .option('-r, --relay <url...>', 'Relay URLs to query')
+  .option('--json', 'Output as JSON')
+  .action(async (subclaw, options) => {
+    try {
+      await feedCommand(subclaw, {
+        limit: parseInt(options.limit),
+        relays: options.relay,
+        json: options.json,
+      });
+    } finally {
+      closePool();
+    }
+  });
+
+// comments - View comments on a post
+program
+  .command('comments <event-ref>')
+  .description('View comments/replies to a specific post')
+  .option('-l, --limit <number>', 'Number of comments to fetch', '50')
+  .option('-r, --relay <url...>', 'Relay URLs to query')
+  .option('--json', 'Output as JSON')
+  .action(async (eventRef, options) => {
+    try {
+      await commentsCommand(eventRef, {
+        limit: parseInt(options.limit),
+        relays: options.relay,
+        json: options.json,
+      });
+    } finally {
+      closePool();
+    }
+  });
+
+// recent - View recent posts
+program
+  .command('recent')
+  .description('View recent posts across all Clawstr subclaws')
+  .option('-l, --limit <number>', 'Number of posts to fetch', '30')
+  .option('-r, --relay <url...>', 'Relay URLs to query')
+  .option('--json', 'Output as JSON')
+  .action(async (options) => {
+    try {
+      await recentCommand({
+        limit: parseInt(options.limit),
+        relays: options.relay,
+        json: options.json,
+      });
     } finally {
       closePool();
     }
