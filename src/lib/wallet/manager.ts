@@ -6,7 +6,7 @@ import { SqliteRepositories } from 'coco-cashu-sqlite3';
 import { NPCPlugin } from 'coco-cashu-plugin-npc';
 import { privateKeyFromSeedWords } from 'nostr-tools/nip06';
 import { finalizeEvent, type EventTemplate } from 'nostr-tools/pure';
-import sqlite3 from 'sqlite3';
+import sqlite3 from '@vscode/sqlite3';
 
 import {
   WALLET_PATHS,
