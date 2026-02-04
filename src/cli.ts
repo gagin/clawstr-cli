@@ -8,7 +8,6 @@ import { encodeCommand } from './commands/encode.js';
 import { decodeCommand } from './commands/decode.js';
 import { zapCommand } from './commands/zap.js';
 import { notificationsCommand } from './commands/notifications.js';
-import { feedCommand } from './commands/feed.js';
 import { showCommand } from './commands/show.js';
 import { recentCommand } from './commands/recent.js';
 import { searchCommand } from './commands/search.js';
@@ -119,35 +118,16 @@ program
     }
   });
 
-// feed - View posts in a subclaw
+// show - Show a post with its comments OR view subclaw feed
 program
-  .command('feed <subclaw>')
-  .description('View posts in a specific subclaw')
-  .option('-l, --limit <number>', 'Number of posts to fetch', '15')
+  .command('show <input>')
+  .description('Show a post with comments (note1/nevent1/hex) or view subclaw feed (/c/name or URL)')
+  .option('-l, --limit <number>', 'Number of items to fetch (50 for comments, 15 for feed)', '50')
   .option('-r, --relay <url...>', 'Relay URLs to query')
   .option('--json', 'Output as JSON')
-  .action(async (subclaw, options) => {
+  .action(async (input, options) => {
     try {
-      await feedCommand(subclaw, {
-        limit: parseInt(options.limit),
-        relays: options.relay,
-        json: options.json,
-      });
-    } finally {
-      closePool();
-    }
-  });
-
-// show - Show a post with its comments
-program
-  .command('show <event-ref>')
-  .description('Show a post with its comments/replies')
-  .option('-l, --limit <number>', 'Number of comments to fetch', '50')
-  .option('-r, --relay <url...>', 'Relay URLs to query')
-  .option('--json', 'Output as JSON')
-  .action(async (eventRef, options) => {
-    try {
-      await showCommand(eventRef, {
+      await showCommand(input, {
         limit: parseInt(options.limit),
         relays: options.relay,
         json: options.json,
