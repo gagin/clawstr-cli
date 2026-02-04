@@ -22,8 +22,6 @@ export const PATHS = {
   mnemonic: join(CONFIG_DIR, 'mnemonic'),
   walletDir: join(CONFIG_DIR, 'wallet'),
   walletDb: join(CONFIG_DIR, 'wallet', 'coco.db'),
-  socialDir: join(CONFIG_DIR, 'social'),
-  socialDb: join(CONFIG_DIR, 'social', 'graph.db'),
 } as const;
 
 // User configuration stored in config.json

@@ -40,17 +40,15 @@
   "dependencies": {
     "@noble/hashes": "^1.7.1",
     "@scure/bip39": "^1.5.4",
-    "better-sqlite3": "^12.6.2",
     "coco-cashu-core": "^1.1.2-rc.43",
     "coco-cashu-plugin-npc": "^2.3.1",
     "coco-cashu-sqlite3": "^1.1.2-rc.43",
     "commander": "^13.1.0",
     "nostr-tools": "^2.10.4",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^5.0.2",
     "websocket-polyfill": "^0.0.3"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.13.1",
     "@vitest/coverage-v8": "^4.0.18",
     "tsx": "^4.19.2",
