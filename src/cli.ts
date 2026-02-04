@@ -1,8 +1,6 @@
 import { Command } from 'commander';
 import { initCommand } from './commands/init.js';
 import { whoamiCommand } from './commands/whoami.js';
-import { eventCommand } from './commands/event.js';
-import { reqCommand } from './commands/req.js';
 import { postCommand } from './commands/post.js';
 import { replyCommand } from './commands/reply.js';
 import { reactCommand } from './commands/react.js';
@@ -53,33 +51,6 @@ program
   .action(async (options) => {
     try {
       await whoamiCommand(options);
-    } finally {
-      closePool();
-    }
-  });
-
-// event - Sign and publish events (nak event replacement)
-program
-  .command('event [relays...]')
-  .description('Sign and publish a Nostr event from stdin')
-  .option('-p, --print', 'Only print signed event, do not publish')
-  .action(async (relays, options) => {
-    try {
-      await eventCommand(relays || [], options);
-    } finally {
-      closePool();
-    }
-  });
-
-// req - Query relays (nak req replacement)
-program
-  .command('req [relays...]')
-  .description('Query Nostr relays with a filter from stdin')
-  .option('-l, --limit <number>', 'Override limit in filter', parseInt)
-  .option('-s, --stream', 'Stream events as they arrive')
-  .action(async (relays, options) => {
-    try {
-      await reqCommand(relays || [], options);
     } finally {
       closePool();
     }
