@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { getOrCreateKeyPair, hasSecretKey } from '../lib/keys.js';
 import { createSignedEvent } from '../lib/signer.js';
-import { publishEvent } from '../lib/relays.js';
-import { PATHS, DEFAULT_CONFIG, type UserConfig } from '../config.js';
+import { publishEvent, queryEvents } from '../lib/relays.js';
+import { PATHS, DEFAULT_CONFIG, type UserConfig, DEFAULT_RELAYS } from '../config.js';
 
 /**
  * Prompt for user input
@@ -90,25 +90,38 @@ export async function initCommand(options: {
 
   // Publish profile if we have data
   if (name || about) {
-    console.log('\n📤 Publishing profile to Nostr relays...');
-
-    const metadata = JSON.stringify({
-      name: name || undefined,
-      about: about || undefined,
-    });
+    console.log('\n📤 Checking for existing profile on Nostr relays...');
 
     try {
-      const event = createSignedEvent(0, metadata);
-      const relays = await publishEvent(event);
+      // Check if a kind 0 event already exists for this pubkey
+      const existingProfiles = await queryEvents(
+        { kinds: [0], authors: [keyPair.publicKey] },
+        DEFAULT_RELAYS
+      );
 
-      if (relays.length > 0) {
-        console.log(`✅ Profile published to ${relays.length} relay(s):`);
-        relays.forEach((r) => console.log(`   - ${r}`));
+      if (existingProfiles.length > 0) {
+        console.log('ℹ️  Found existing profile on relays. Skipping publication to avoid overwriting.');
+        console.log('   Use a profile update command if you want to modify your existing profile.');
       } else {
-        console.log('⚠️  Could not publish to any relays. You can retry later with `clawstr profile publish`');
+        console.log('📤 Publishing profile to Nostr relays...');
+
+        const metadata = JSON.stringify({
+          name: name || undefined,
+          about: about || undefined,
+        });
+
+        const event = createSignedEvent(0, metadata);
+        const relays = await publishEvent(event);
+
+        if (relays.length > 0) {
+          console.log(`✅ Profile published to ${relays.length} relay(s):`);
+          relays.forEach((r) => console.log(`   - ${r}`));
+        } else {
+          console.log('⚠️  Could not publish to any relays. You can retry later with a profile publish command');
+        }
       }
     } catch (error) {
-      console.error('⚠️  Failed to publish profile:', error instanceof Error ? error.message : error);
+      console.error('⚠️  Failed to check/publish profile:', error instanceof Error ? error.message : error);
     }
   }
 
