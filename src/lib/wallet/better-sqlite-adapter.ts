@@ -27,9 +27,19 @@ interface DatabaseLike {
 export class BetterSqliteAdapter implements DatabaseLike {
   constructor(private db: Database.Database) {}
 
+  /**
+   * Fixes SQL queries from coco-cashu-sqlite3 that use double quotes for string literals.
+   * SQLite expects single quotes for string literals, and double quotes for identifiers.
+   */
+  private fixSql(sql: string): string {
+    return sql
+      .replace(/=\s*"ready"/g, "= 'ready'")
+      .replace(/=\s*"inflight"/g, "= 'inflight'");
+  }
+
   exec(sql: string, cb: (err: Error | null) => void): void {
     try {
-      this.db.exec(sql);
+      this.db.exec(this.fixSql(sql));
       cb(null);
     } catch (err) {
       cb(err as Error);
@@ -42,7 +52,7 @@ export class BetterSqliteAdapter implements DatabaseLike {
     cb: (this: { lastID: number; changes: number }, err: Error | null) => void
   ): void {
     try {
-      const result = this.db.prepare(sql).run(...params);
+      const result = this.db.prepare(this.fixSql(sql)).run(...params);
       const context = {
         lastID: Number(result.lastInsertRowid),
         changes: result.changes,
@@ -55,7 +65,7 @@ export class BetterSqliteAdapter implements DatabaseLike {
 
   get(sql: string, params: any[], cb: (err: Error | null, row: any) => void): void {
     try {
-      const row = this.db.prepare(sql).get(...params);
+      const row = this.db.prepare(this.fixSql(sql)).get(...params);
       cb(null, row);
     } catch (err) {
       cb(err as Error, undefined);
@@ -64,7 +74,7 @@ export class BetterSqliteAdapter implements DatabaseLike {
 
   all(sql: string, params: any[], cb: (err: Error | null, rows: any[]) => void): void {
     try {
-      const rows = this.db.prepare(sql).all(...params);
+      const rows = this.db.prepare(this.fixSql(sql)).all(...params);
       cb(null, rows);
     } catch (err) {
       cb(err as Error, []);
